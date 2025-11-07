@@ -140,34 +140,11 @@
     }
 
     function verificar(seleccion, idioma, boton) {
-      if (aciertos[idioma]) return; // ya acertado
+      if (aciertos[idioma]) return;
 
       const esCorrecta = seleccion === actual.name[idioma];
       if (esCorrecta) {
         aciertos[idioma] = true;
         boton.disabled = true;
         boton.style.backgroundColor = "#c8e6c9";
-        boton.style.fontWeight = "bold";
-        comprobarTodosAciertos();
-      } else {
-        const radicalErroneo = radicales.find(r => idiomas.some(id => r.name[id] === seleccion));
-        if (radicalErroneo) {
-          const traducciones = idiomas.map(id => `${id}: "${radicalErroneo.name[id]}"`).join(" | ");
-          document.getElementById("mensaje").innerText =
-            `❌ Incorrecto. El radical ${radicalErroneo.radical} significa: ${traducciones}`;
-        } else {
-          document.getElementById("mensaje").innerText = "❌ Incorrecto. No se encontró el significado.";
-        }
-      }
-    }
-
-    function comprobarTodosAciertos() {
-      const todosCorrectos = idiomas.every(id => aciertos[id]);
-      if (todosCorrectos) {
-        document.getElementById("mensaje").innerText = "✅ ¡Correcto en todos los idiomas!";
-        setTimeout(siguientePregunta, 1500);
-      }
-    }
-  </script>
-</body>
-</html>
+        boton.style.fontWeight
