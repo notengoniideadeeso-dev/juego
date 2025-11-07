@@ -46,6 +46,12 @@
       color: gray;
       font-style: italic;
     }
+    #estadisticas {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+      background: #f0f0f0;
+    }
   </style>
 </head>
 <body>
@@ -68,12 +74,22 @@
   <div id="opciones"></div>
   <div id="mensaje"></div>
 
+  <div id="estadisticas">
+    <h3>📈 Estadísticas</h3>
+    <div id="statsContenido"></div>
+  </div>
+
   <script>
     let radicales = [];
     let actual = null;
     let numFalsas = 3;
     let idiomas = [];
     let aciertos = {};
+    let stats = {
+      preguntas: {},
+      fallos: {},
+      fallosEntreIdiomas: 0
+    };
 
     fetch('chinese-radicals.json')
       .then(res => res.json())
@@ -102,7 +118,10 @@
       const i = Math.floor(Math.random() * radicales.length);
       actual = radicales[i];
       aciertos = {};
-      idiomas.forEach(id => aciertos[id] = false);
+      idiomas.forEach(id => {
+        aciertos[id] = false;
+        stats.preguntas[id] = (stats.preguntas[id] || 0) + 1;
+      });
 
       const paleta = ["#fffbe6", "#e6f7ff", "#f9fbe7", "#f0fff0", "#fff0f6", "#f3e5f5"];
       const colores = {};
@@ -142,6 +161,8 @@
 
         contenedor.appendChild(grupo);
       });
+
+      actualizarEstadisticas();
     }
 
     function verificar(seleccion, idioma, boton) {
@@ -155,6 +176,7 @@
         boton.style.fontWeight = "bold";
         comprobarTodosAciertos();
       } else {
+        stats.fallos[idioma] = (stats.fallos[idioma] || 0) + 1;
         const radicalErroneo = radicales.find(r => idiomas.some(id => r.name[id] === seleccion));
         if (radicalErroneo) {
           const traducciones = idiomas.map(id => `${id}: "${radicalErroneo.name[id]}"`).join(" | ");
@@ -163,15 +185,36 @@
         } else {
           document.getElementById("mensaje").innerText = "❌ Incorrecto. No se encontró el significado.";
         }
+        actualizarEstadisticas();
       }
     }
 
     function comprobarTodosAciertos() {
       const todosCorrectos = idiomas.every(id => aciertos[id]);
       if (todosCorrectos) {
+        const traducciones = idiomas.map(id => actual.name[id]);
+        const iguales = traducciones.every(t => t === traducciones[0]);
+        if (!iguales) {
+          stats.fallosEntreIdiomas++;
+        }
         document.getElementById("mensaje").innerText = "✅ ¡Correcto en todos los idiomas!";
+        actualizarEstadisticas();
         setTimeout(siguientePregunta, 1500);
       }
+    }
+
+    function actualizarEstadisticas() {
+      const contenedor = document.getElementById("statsContenido");
+      let html = "<ul>";
+      idiomas.forEach(id => {
+        const total = stats.preguntas[id] || 0;
+        const fallos = stats.fallos[id] || 0;
+        const porcentaje = total > 0 ? ((fallos / total) * 100).toFixed(1) : "0.0";
+        html += `<li><strong>${id.toUpperCase()}</strong>: ${total} preguntas, ${porcentaje}% fallos</li>`;
+      });
+      html += `<li><strong>❗ Fallos entre idiomas:</strong> ${stats.fallosEntreIdiomas}</li>`;
+      html += "</ul>";
+      contenedor.innerHTML = html;
     }
   </script>
 </body>
