@@ -38,6 +38,14 @@
       margin-bottom: 10px;
       border-radius: 6px;
     }
+    #iniciarBtn {
+      display: none;
+    }
+    #cargando {
+      text-align: center;
+      color: gray;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -52,7 +60,8 @@
     <label>Número de respuestas falsas: </label>
     <input type="number" id="numFalsas" min="1" max="10" value="3">
     <br><br>
-    <button onclick="iniciarJuego()">Iniciar</button>
+    <button id="iniciarBtn" onclick="iniciarJuego()">Iniciar</button>
+    <div id="cargando">Cargando datos...</div>
   </div>
 
   <div id="pregunta"></div>
@@ -64,7 +73,6 @@
     let actual = null;
     let numFalsas = 3;
     let idiomas = [];
-    let datosCargados = false;
     let aciertos = {};
 
     fetch('chinese-radicals.json')
@@ -74,7 +82,8 @@
           radical: clave,
           name: valor.name
         }));
-        datosCargados = true;
+        document.getElementById("cargando").style.display = "none";
+        document.getElementById("iniciarBtn").style.display = "inline-block";
       })
       .catch(err => {
         document.body.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar el archivo JSON.</p>";
@@ -82,10 +91,6 @@
       });
 
     function iniciarJuego() {
-      if (!datosCargados) {
-        alert("Los datos aún no están listos. Espera unos segundos.");
-        return;
-      }
       idiomas = Array.from(document.querySelectorAll('#config input[type="checkbox"]:checked')).map(el => el.value);
       numFalsas = parseInt(document.getElementById("numFalsas").value);
       document.getElementById("config").style.display = "none";
