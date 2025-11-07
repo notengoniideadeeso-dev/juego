@@ -89,8 +89,7 @@
     let stats = {
       preguntasTotales: 0,
       preguntasPorIdioma: {},
-      fallosPorIdioma: {},
-      fallosEntreIdiomas: 0
+      fallosPorIdioma: {}
     };
 
     fetch('chinese-radicals.json')
@@ -199,11 +198,6 @@
     function comprobarTodosAciertos() {
       const todosCorrectos = idiomas.every(id => aciertos[id]);
       if (todosCorrectos) {
-        const respuestas = idiomas.map(id => respuestasSeleccionadas[id]);
-        const iguales = respuestas.every(r => r === respuestas[0]);
-        if (!iguales) {
-          stats.fallosEntreIdiomas++;
-        }
         document.getElementById("mensaje").innerText = "✅ ¡Correcto en todos los idiomas!";
         actualizarEstadisticas();
         setTimeout(siguientePregunta, 1500);
@@ -223,7 +217,6 @@
         html += `<li><strong>${id.toUpperCase()}</strong>: ${total} preguntas, ${porcentaje}% fallos</li>`;
       });
 
-      html += `<li><strong>❗ Fallos entre idiomas:</strong> ${stats.fallosEntreIdiomas}</li>`;
       html += "</ul>";
       contenedor.innerHTML = html;
     }
