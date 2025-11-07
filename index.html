@@ -88,8 +88,8 @@
     let respuestasSeleccionadas = {};
     let stats = {
       preguntasTotales: 0,
-      preguntas: {},
-      fallos: {},
+      preguntasPorIdioma: {},
+      fallosPorIdioma: {},
       fallosEntreIdiomas: 0
     };
 
@@ -125,7 +125,7 @@
 
       idiomas.forEach(id => {
         aciertos[id] = false;
-        stats.preguntas[id] = (stats.preguntas[id] || 0) + 1;
+        stats.preguntasPorIdioma[id] = (stats.preguntasPorIdioma[id] || 0) + 1;
       });
 
       const paleta = ["#fffbe6", "#e6f7ff", "#f9fbe7", "#f0fff0", "#fff0f6", "#f3e5f5"];
@@ -183,7 +183,7 @@
         boton.style.fontWeight = "bold";
         comprobarTodosAciertos();
       } else {
-        stats.fallos[idioma] = (stats.fallos[idioma] || 0) + 1;
+        stats.fallosPorIdioma[idioma] = (stats.fallosPorIdioma[idioma] || 0) + 1;
         const radicalErroneo = radicales.find(r => idiomas.some(id => r.name[id] === seleccion));
         if (radicalErroneo) {
           const traducciones = idiomas.map(id => `${id}: "${radicalErroneo.name[id]}"`).join(" | ");
@@ -213,13 +213,16 @@
     function actualizarEstadisticas() {
       const contenedor = document.getElementById("statsContenido");
       let html = "<ul>";
+
+      html += `<li><strong>📌 Total de preguntas realizadas:</strong> ${stats.preguntasTotales}</li>`;
+
       idiomas.forEach(id => {
-        const total = stats.preguntas[id] || 0;
-        const fallos = stats.fallos[id] || 0;
+        const total = stats.preguntasPorIdioma[id] || 0;
+        const fallos = stats.fallosPorIdioma[id] || 0;
         const porcentaje = total > 0 ? ((fallos / total) * 100).toFixed(1) : "0.0";
         html += `<li><strong>${id.toUpperCase()}</strong>: ${total} preguntas, ${porcentaje}% fallos</li>`;
       });
-      html += `<li><strong>📌 Total de preguntas:</strong> ${stats.preguntasTotales}</li>`;
+
       html += `<li><strong>❗ Fallos entre idiomas:</strong> ${stats.fallosEntreIdiomas}</li>`;
       html += "</ul>";
       contenedor.innerHTML = html;
