@@ -65,6 +65,7 @@
     let numFalsas = 3;
     let idiomas = [];
     let datosCargados = false;
+    let aciertos = {};
 
     fetch('chinese-radicals.json')
       .then(res => res.json())
@@ -95,6 +96,8 @@
       document.getElementById("mensaje").innerText = "";
       const i = Math.floor(Math.random() * radicales.length);
       actual = radicales[i];
+      aciertos = {};
+      idiomas.forEach(id => aciertos[id] = false);
 
       const paleta = ["#fffbe6", "#e6f7ff", "#f9fbe7", "#f0fff0", "#fff0f6", "#f3e5f5"];
       const colores = {};
@@ -128,7 +131,7 @@
         mezcladas.forEach(opcion => {
           const btn = document.createElement("button");
           btn.innerText = opcion;
-          btn.onclick = () => verificar(opcion, idioma);
+          btn.onclick = () => verificar(opcion, idioma, btn);
           grupo.appendChild(btn);
         });
 
@@ -136,11 +139,16 @@
       });
     }
 
-    function verificar(seleccion, idioma) {
+    function verificar(seleccion, idioma, boton) {
+      if (aciertos[idioma]) return; // ya acertado
+
       const esCorrecta = seleccion === actual.name[idioma];
       if (esCorrecta) {
-        document.getElementById("mensaje").innerText = "✅ ¡Correcto!";
-        setTimeout(siguientePregunta, 1500);
+        aciertos[idioma] = true;
+        boton.disabled = true;
+        boton.style.backgroundColor = "#c8e6c9";
+        boton.style.fontWeight = "bold";
+        comprobarTodosAciertos();
       } else {
         const radicalErroneo = radicales.find(r => idiomas.some(id => r.name[id] === seleccion));
         if (radicalErroneo) {
@@ -150,6 +158,14 @@
         } else {
           document.getElementById("mensaje").innerText = "❌ Incorrecto. No se encontró el significado.";
         }
+      }
+    }
+
+    function comprobarTodosAciertos() {
+      const todosCorrectos = idiomas.every(id => aciertos[id]);
+      if (todosCorrectos) {
+        document.getElementById("mensaje").innerText = "✅ ¡Correcto en todos los idiomas!";
+        setTimeout(siguientePregunta, 1500);
       }
     }
   </script>
