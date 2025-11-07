@@ -87,6 +87,7 @@
     let aciertos = {};
     let respuestasSeleccionadas = {};
     let stats = {
+      preguntasTotales: 0,
       preguntas: {},
       fallos: {},
       fallosEntreIdiomas: 0
@@ -120,6 +121,8 @@
       actual = radicales[i];
       aciertos = {};
       respuestasSeleccionadas = {};
+      stats.preguntasTotales++;
+
       idiomas.forEach(id => {
         aciertos[id] = false;
         stats.preguntas[id] = (stats.preguntas[id] || 0) + 1;
@@ -216,6 +219,7 @@
         const porcentaje = total > 0 ? ((fallos / total) * 100).toFixed(1) : "0.0";
         html += `<li><strong>${id.toUpperCase()}</strong>: ${total} preguntas, ${porcentaje}% fallos</li>`;
       });
+      html += `<li><strong>📌 Total de preguntas:</strong> ${stats.preguntasTotales}</li>`;
       html += `<li><strong>❗ Fallos entre idiomas:</strong> ${stats.fallosEntreIdiomas}</li>`;
       html += "</ul>";
       contenedor.innerHTML = html;
