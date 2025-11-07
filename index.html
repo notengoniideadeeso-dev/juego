@@ -85,6 +85,7 @@
     let numFalsas = 3;
     let idiomas = [];
     let aciertos = {};
+    let respuestasSeleccionadas = {};
     let stats = {
       preguntas: {},
       fallos: {},
@@ -118,6 +119,7 @@
       const i = Math.floor(Math.random() * radicales.length);
       actual = radicales[i];
       aciertos = {};
+      respuestasSeleccionadas = {};
       idiomas.forEach(id => {
         aciertos[id] = false;
         stats.preguntas[id] = (stats.preguntas[id] || 0) + 1;
@@ -168,6 +170,8 @@
     function verificar(seleccion, idioma, boton) {
       if (aciertos[idioma]) return;
 
+      respuestasSeleccionadas[idioma] = seleccion;
+
       const esCorrecta = seleccion === actual.name[idioma];
       if (esCorrecta) {
         aciertos[idioma] = true;
@@ -192,8 +196,8 @@
     function comprobarTodosAciertos() {
       const todosCorrectos = idiomas.every(id => aciertos[id]);
       if (todosCorrectos) {
-        const traducciones = idiomas.map(id => actual.name[id]);
-        const iguales = traducciones.every(t => t === traducciones[0]);
+        const respuestas = idiomas.map(id => respuestasSeleccionadas[id]);
+        const iguales = respuestas.every(r => r === respuestas[0]);
         if (!iguales) {
           stats.fallosEntreIdiomas++;
         }
