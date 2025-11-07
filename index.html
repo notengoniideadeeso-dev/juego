@@ -1,142 +1,66 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Juego de Radicales Chinos</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-      background-color: #f9f9f9;
-    }
-    h1 {
-      text-align: center;
-    }
-    #opciones button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      width: 90%;
-      font-size: 16px;
-    }
-    #mensaje {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    #config {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    #config label {
-      margin-right: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Juego de Radicales Chinos</h1>
+function siguientePregunta() {
+  document.getElementById("mensaje").innerText = "";
+  const i = Math.floor(Math.random() * radicales.length);
+  actual = radicales[i];
 
-  <div id="config">
-    <p>Selecciona los idiomas que quieres usar:</p>
-    <label><input type="checkbox" value="es" checked> Español</label>
-    <label><input type="checkbox" value="en"> Inglés</label>
-    <label><input type="checkbox" value="fr"> Francés</label>
-    <br><br>
-    <label>Número de respuestas falsas: </label>
-    <input type="number" id="numFalsas" min="1" max="10" value="3">
-    <br><br>
-    <button id="iniciarBtn" onclick="iniciarJuego()">Iniciar</button>
-  </div>
+  const colores = {
+    es: "#fffbe6",
+    en: "#e6f7ff",
+    fr: "#f9fbe7"
+  };
 
-  <div id="pregunta"></div>
-  <div id="opciones"></div>
-  <div id="mensaje"></div>
+  const contenedor = document.getElementById("opciones");
+  contenedor.innerHTML = "";
+  document.getElementById("pregunta").innerHTML = `<h2>¿Qué significa el radical <span style="font-size: 24px;">${actual.radical}</span>?</h2>`;
 
-  <script>
-    let radicales = [];
-    let actual = null;
-    let numFalsas = 3;
-    let idiomas = [];
-    let datosCargados = false;
+  idiomas.forEach(idioma => {
+    const grupo = document.createElement("div");
+    grupo.style.backgroundColor = colores[idioma] || "#f0f0f0";
+    grupo.style.padding = "10px";
+    grupo.style.marginBottom = "10px";
+    grupo.style.borderRadius = "6px";
 
-    fetch('chinese-radicals.json')
-      .then(res => res.json())
-      .then(data => {
-        radicales = Object.entries(data).map(([clave, valor]) => ({
-          radical: clave,
-          name: valor.name
-        }));
-        datosCargados = true;
-      })
-      .catch(err => {
-        document.body.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar el archivo JSON.</p>";
-        console.error(err);
-      });
-
-    function iniciarJuego() {
-      if (!datosCargados) {
-        alert("Los datos aún no están listos. Espera unos segundos.");
-        return;
-      }
-      idiomas = Array.from(document.querySelectorAll('#config input[type="checkbox"]:checked')).map(el => el.value);
-      numFalsas = parseInt(document.getElementById("numFalsas").value);
-      document.getElementById("config").style.display = "none";
-      siguientePregunta();
-    }
-
-    function siguientePregunta() {
-      document.getElementById("mensaje").innerText = "";
-      const i = Math.floor(Math.random() * radicales.length);
-      actual = radicales[i];
-
-      const opciones = new Set();
-      idiomas.forEach(idioma => {
-        opciones.add(actual.name[idioma]);
-      });
-
-      while (opciones.size < idiomas.length * (numFalsas + 1)) {
-        const aleatorio = radicales[Math.floor(Math.random() * radicales.length)];
-        idiomas.forEach(idioma => {
-          if (aleatorio.name[idioma] !== actual.name[idioma]) {
-            opciones.add(aleatorio.name[idioma]);
-          }
-        });
-      }
-
-      const mezcladas = Array.from(opciones).sort(() => Math.random() - 0.5);
-
-      document.getElementById("pregunta").innerHTML = `<h2>¿Qué significa el radical <span style="font-size: 24px;">${actual.radical}</span>?</h2>`;
-      const contenedor = document.getElementById("opciones");
-      contenedor.innerHTML = "";
-
-      mezcladas.forEach(opcion => {
-        const btn = document.createElement("button");
-        btn.innerText = opcion;
-        btn.onclick = () => verificar(opcion);
-        contenedor.appendChild(btn);
-      });
-    }
-
-    function verificar(seleccion) {
-      const esCorrecta = idiomas.some(idioma => seleccion === actual.name[idioma]);
-      if (esCorrecta) {
-        document.getElementById("mensaje").innerText = "✅ ¡Correcto!";
-        setTimeout(siguientePregunta, 1500);
-      } else {
-        const radicalErroneo = radicales.find(r =>
-          idiomas.some(idioma => r.name[idioma] === seleccion)
-        );
-        if (radicalErroneo) {
-          const traducciones = idiomas.map(idioma => `${idioma}: "${radicalErroneo.name[idioma]}"`).join(" | ");
-          document.getElementById("mensaje").innerText =
-            `❌ Incorrecto. El significado de ese radical (${radicalErroneo.radical}) es: ${traducciones}`;
-        } else {
-          document.getElementById("mensaje").innerText = "❌ Incorrecto. No se encontró el significado.";
-        }
+    const opciones = new Set([actual.name[idioma]]);
+    while (opciones.size < numFalsas + 1) {
+      const aleatorio = radicales[Math.floor(Math.random() * radicales.length)];
+      if (aleatorio.name[idioma] !== actual.name[idioma]) {
+        opciones.add(aleatorio.name[idioma]);
       }
     }
-  </script>
-</body>
-</html>
+
+    const mezcladas = Array.from(opciones).sort(() => Math.random() - 0.5);
+
+    const titulo = document.createElement("h3");
+    titulo.innerText = `Opciones en ${idioma.toUpperCase()}`;
+    grupo.appendChild(titulo);
+
+    mezcladas.forEach(opcion => {
+      const btn = document.createElement("button");
+      btn.innerText = opcion;
+      btn.style.display = "block";
+      btn.style.margin = "5px auto";
+      btn.style.width = "90%";
+      btn.onclick = () => verificar(opcion, idioma);
+      grupo.appendChild(btn);
+    });
+
+    contenedor.appendChild(grupo);
+  });
+}
+
+function verificar(seleccion, idioma) {
+  const esCorrecta = seleccion === actual.name[idioma];
+  if (esCorrecta) {
+    document.getElementById("mensaje").innerText = "✅ ¡Correcto!";
+    setTimeout(siguientePregunta, 1500);
+  } else {
+    const radicalErroneo = radicales.find(r => idiomas.some(id => r.name[id] === seleccion));
+    if (radicalErroneo) {
+      const traducciones = idiomas.map(id => `${id}: "${radicalErroneo.name[id]}"`).join(" | ");
+      document.getElementById("mensaje").innerText =
+        `❌ Incorrecto. El radical ${radicalErroneo.radical} significa: ${traducciones}`;
+    } else {
+      document.getElementById("mensaje").innerText = "❌ Incorrecto. No se encontró el significado.";
+    }
+  }
+}
